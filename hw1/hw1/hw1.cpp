@@ -55,7 +55,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	glutKeyboardFunc(keyPressed);
  
 	glutDisplayFunc(renderScene);
- 
+
+	const char* version = (const char*) glGetString(GL_VERSION);
+	printf("%s", version);
+
 	glutMainLoop();
  
 	return 0;

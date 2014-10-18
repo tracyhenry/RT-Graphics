@@ -5,5 +5,6 @@ Draw a star using OpenGL
 
 2. Used glutKeyboardFunc(keyPressed) to catch the event of the keyboard.
 
-3. The source code is in hw1.cpp
+3. Used Visual Studio 2010 and OpenGL 3.1.0.
 
+4. The source code is in hw1.cpp
