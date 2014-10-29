@@ -2,7 +2,8 @@
 //
 
 #include "stdafx.h"
-#include<gl/glut.h>
+#include <Windows.h>
+#include <gl/glut.h>
 
 //Real numbers to determine the materials
 GLfloat material_ambient[] = {0.25f, 0.25f, 0.25f};
@@ -19,6 +20,7 @@ GLfloat cRed[] = {1.0, 0.0, 0.0, 1.0};
 
 //Real numbers denoting the angles OR relative size of each object
 GLfloat animation[10] = {0, 0, 0.5, 0, 0, 0};
+GLfloat delta[10] = {1, 1, 0.01, 1, 1, 1};
 
 //the last key pressed
 unsigned lastKey = 'q';
@@ -61,7 +63,7 @@ void display(void)
 	glPushMatrix();
 	glTranslatef(0, 2, -7.0);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cGreen);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
 	glRotatef(animation[1], 0.0f, 1.0f, 0.5f);
 	glutSolidCube(1.5);
 	glPopMatrix();
@@ -70,7 +72,7 @@ void display(void)
 	glPushMatrix();
 	glTranslatef(4, 2, -7.0);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cBlue);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
 	glutSolidSphere(animation[2], 50, 50);
 	glPopMatrix();
 
@@ -78,35 +80,25 @@ void display(void)
 	glPushMatrix();
 	glTranslatef(-4, -2, -7.0);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cYellow);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
 	glRotatef(animation[3], -0.1f, -0.9f, 0.2f);
 	glutSolidCone(0.8, 1.9, 50, 50);
 	glPopMatrix();
-
-	//Fourth, a cone, rotating
-	glPushMatrix();
-	glTranslatef(-4, -2, -7.0);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cYellow);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
-	glRotatef(animation[3], -0.1f, -0.9f, 0.2f);
-	glutSolidCone(0.8, 1.9, 50, 50);
-	glPopMatrix();
-
 
 	//Fifth, a torus, scale
 	glPushMatrix();
 	glTranslatef(0, -2, -7.0);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cWhite);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
 	glRotatef(animation[4], 1, -1, 1);
-	glutSolidTorus(0.65, 0.8, 50, 50);
+	glutSolidTorus(0.4, 0.8, 50, 50);
 	glPopMatrix();
 
 	//Sixth, an Octahedron, rotate
 	glPushMatrix();
 	glTranslatef(4, -2, -7.0);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cPeach);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
 	glRotatef(animation[5], 0.8, 0.2, 0.6);
 	glutSolidOctahedron();
 	glPopMatrix();
@@ -126,16 +118,48 @@ void reshape(int width, int height)
 
 void keyPressed (unsigned char key, int x, int y)
 {
-
+	if (key == 27) 
+		exit(0);
+	lastKey = key;
 }
 
 void timer()
 {
-	animation[0] ++;
-	animation[1] ++;
-	animation[3] ++;
-	animation[4] ++;
-	animation[5] ++;
+	if (lastKey == 'q') 
+		return ;
+	switch (lastKey)
+	{
+		case '1' : 
+			animation[0] += delta[0]; 
+			break;
+		case '2' : 
+			animation[1] += delta[1]; 
+			break;
+		case '3' :
+			animation[2] += delta[2];
+			if (animation[2] > 1.2 || animation[2] < 0.5)
+				delta[2] *= -1;			
+			break;
+		case '4' :
+			animation[3] += delta[3];
+			break;
+		case '5' :
+			animation[4] += delta[4];
+			break;
+		case '6' :
+			animation[5] += delta[5];
+			break;
+		case '7' :
+			animation[0] += delta[0]; 
+			animation[1] += delta[1]; 
+			animation[2] += delta[2];
+			if (animation[2] > 1.2 || animation[2] < 0.5)
+				delta[2] *= -1;		
+			animation[3] += delta[3];
+			animation[4] += delta[4];
+			animation[5] += delta[5];
+	}
+
 	glutPostRedisplay();
 }
 
