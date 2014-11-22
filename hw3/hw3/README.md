@@ -20,3 +20,10 @@ Menus and Full screen
 	
 	'ESC' : quit the program
 	
+2. Click '9' to switch between full screen and window.
+
+3. Right click on mouse to activate the pop-up menu.
+
+   There may be a bug on Windows 7 : You cannot see the menu when entering the fullscreen mode, 
+   
+   but you can click on them, and it works.
