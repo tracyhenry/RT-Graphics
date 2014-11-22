@@ -25,6 +25,16 @@ GLfloat delta[10] = {1, 1, 0.01, 1, 1, 1};
 //the last key pressed
 unsigned lastKey = 'q';
 
+void menuEntryRespond(int value)
+{
+	if (value == 8)
+	{
+		lastKey = 'q'; 
+		return ;
+	}
+	lastKey = (char) (48 + value);
+}
+
 void Init()
 {
 	//Init Material
@@ -44,6 +54,19 @@ void Init()
 
 	//Enable depth
 	glEnable(GL_DEPTH_TEST);
+	
+	//Create Menu
+	glutCreateMenu(menuEntryRespond);
+	glutAddMenuEntry("Rotate the tea pot!", 1);
+	glutAddMenuEntry("Rotate the cube!", 2);
+	glutAddMenuEntry("Scale the sphere", 3);
+	glutAddMenuEntry("Rotate the cone!", 4);
+	glutAddMenuEntry("Rotate the torus!", 5);
+	glutAddMenuEntry("Rotate the octahedron!", 6);
+	glutAddMenuEntry("Rotate ALL of them!", 7);
+	glutAddMenuEntry("Stop ALL of them!", 8);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
+
 }
 
 void display(void)
@@ -167,6 +190,8 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	glutInit(&argc, (char**) argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+
+
 	glutInitWindowPosition(100,100);
 	glutInitWindowSize(640,480);
 	glutCreateWindow("Primitive Transformation");
