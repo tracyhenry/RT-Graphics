@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include <Windows.h>
 #include <gl/glut.h>
+#include <iostream>
+using namespace std;
 
 //Real numbers to determine the materials
 GLfloat material_ambient[] = {0.25f, 0.25f, 0.25f};
@@ -24,6 +26,7 @@ GLfloat delta[10] = {1, 1, 0.01, 1, 1, 1};
 
 //the last key pressed
 unsigned lastKey = 'q';
+bool fullscreen = false;
 
 void menuEntryRespond(int value)
 {
@@ -59,7 +62,7 @@ void Init()
 	glutCreateMenu(menuEntryRespond);
 	glutAddMenuEntry("Rotate the tea pot!", 1);
 	glutAddMenuEntry("Rotate the cube!", 2);
-	glutAddMenuEntry("Scale the sphere", 3);
+	glutAddMenuEntry("Scale the sphere!", 3);
 	glutAddMenuEntry("Rotate the cone!", 4);
 	glutAddMenuEntry("Rotate the torus!", 5);
 	glutAddMenuEntry("Rotate the octahedron!", 6);
@@ -67,7 +70,6 @@ void Init()
 	glutAddMenuEntry("Stop ALL of them!", 8);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 	
-	glutFullScreen();
 }
 
 void display(void)
@@ -142,6 +144,17 @@ void reshape(int width, int height)
 
 void keyPressed (unsigned char key, int x, int y)
 {
+	if (key == 57)
+	{
+		fullscreen = !fullscreen;
+		if (fullscreen)
+			glutFullScreen();
+		else
+		{
+			glutReshapeWindow(640, 480);
+			glutPositionWindow(100, 100);	
+		}
+	}
 	if (key == 27) 
 		exit(0);
 	lastKey = key;
