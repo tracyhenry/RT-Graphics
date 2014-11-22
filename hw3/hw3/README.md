@@ -26,4 +26,4 @@ Menus and Full screen
 
    There may be a bug on Windows 7 : You cannot see the menu when entering the fullscreen mode, 
    
-   but you can click on them, and it works.
+   but you can click on them(based on the relative position as you can see in the window mode), and it surprisingly works.
