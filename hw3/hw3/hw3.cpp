@@ -66,7 +66,8 @@ void Init()
 	glutAddMenuEntry("Rotate ALL of them!", 7);
 	glutAddMenuEntry("Stop ALL of them!", 8);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
-
+	
+	glutFullScreen();
 }
 
 void display(void)
@@ -194,13 +195,13 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	glutInitWindowPosition(100,100);
 	glutInitWindowSize(640,480);
-	glutCreateWindow("Primitive Transformation");
+	glutCreateWindow("Primitive Transformation"); 
 
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyPressed);
 	glutIdleFunc(timer);
-
+	
 	Init();
 
 	glutMainLoop();
