@@ -1,7 +1,3 @@
-
-// hw2.cpp : 定义控制台应用程序的入口点。
-//
-
 #include "stdafx.h"
 #include <Windows.h>
 #include <gl/glut.h>
@@ -15,6 +11,7 @@ GLfloat material_specular[] = {0.40f, 0.40f, 0.40f};
 GLfloat material_shininess = 50.0f;
 
 GLfloat cYellow[] = {1.0, 1.0, 0.2, 1.0};
+GLfloat cPurple[] = {0.8, 0, 0.8};
 GLfloat cPeach[] = {1.0, 0.937, 0.83};
 GLfloat cGreen[] = {0.0, 1.0, 0.0, 1.0};
 GLfloat cWhite[] = {1.0, 1.0, 1.0, 1.0};
@@ -24,6 +21,9 @@ GLfloat cRed[] = {1.0, 0.0, 0.0, 1.0};
 
 //the last key pressed
 unsigned lastKey = 'q';
+
+//
+GLfloat puckx, pucky, mx1, my1, mx2, my2;
 
 GLuint LoadTexture(const char * filename)
 {
@@ -112,6 +112,11 @@ void Init()
 	
 	//Enable depth
 	glEnable(GL_DEPTH_TEST);
+
+	//Init positions
+	puckx = pucky = 0;
+	mx1 = 0, my1 = -10;
+	mx2 = 0, my2 = 10;
 }
 
 void reshape(int width, int height)
@@ -160,13 +165,13 @@ void display(void)
 	glBegin(GL_QUADS);
 	glNormal3f(0, 0, 1);   
 	glTexCoord2f(0.0, 0.0);
-	glVertex3f(BOUND, BOUND, 0);			// Top Right Of The Quad (Top)
+	glVertex3f(BOUND, BOUND, 0);
 	glTexCoord2f(0.0, REPEAT);	
-	glVertex3f(-BOUND, BOUND, 0);			// Top Left Of The Quad (Top)
+	glVertex3f(-BOUND, BOUND, 0);
 	glTexCoord2f(REPEAT, REPEAT);	
-	glVertex3f(-BOUND, -BOUND, 0);			// Bottom Left Of The Quad (Top)
+	glVertex3f(-BOUND, -BOUND, 0);
 	glTexCoord2f(REPEAT, 0.0);	
-	glVertex3f(BOUND, -BOUND, 0);			// Bottom Right Of The Quad (Top)
+	glVertex3f(BOUND, -BOUND, 0);
 	glEnd();					
 	glPopMatrix();
 	
@@ -186,7 +191,7 @@ void display(void)
 	glutSolidCube(22);
 	glPopMatrix();  
 
-	//Draw Goal
+	//Draw Goal 1
 	glPushMatrix();
 	glTranslatef(0, 0, 1e-2);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cRed);
@@ -194,13 +199,47 @@ void display(void)
 	glRectf(-4, -20, 4, -21);
 	glPopMatrix(); 
 
-	//Draw Goal
+	//Draw Goal 2
 	glPushMatrix();
 	glTranslatef(0, 0, 1e-2);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cRed);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
 	glRectf(-4, 20, 4, 21);
 	glPopMatrix(); 
+
+	//Draw a puck
+	glPushMatrix();
+	glTranslatef(puckx, pucky, 1e-2);
+	GLUquadric *quad = gluNewQuadric();
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cWhite);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
+	gluCylinder(quad, 1, 1, 1, 1000, 1000);
+	glTranslatef(puckx, pucky, 1e-2 + 1);
+	gluDisk(quad, 0, 1, 1000, 1000);
+	glPopMatrix(); 
+
+	//Draw mallet 1
+	glPushMatrix();
+	glTranslatef(mx1, my1, 1e-2);
+	GLUquadric *quad1 = gluNewQuadric();
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cBlue);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
+	gluCylinder(quad1, 1.5, 1.5, 1, 1000, 1000);
+	glTranslatef(puckx, pucky, 1e-2 + 1);
+	gluDisk(quad1, 0, 1.5, 1000, 1000);
+	glPopMatrix(); 
+
+	//Draw mallet 1
+	glPushMatrix();
+	glTranslatef(mx2, my2, 1e-2);
+	GLUquadric *quad2 = gluNewQuadric();
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cPurple);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
+	gluCylinder(quad2, 1.5, 1.5, 1, 1000, 1000);
+	glTranslatef(puckx, pucky, 1e-2 + 1);
+	gluDisk(quad2, 0, 1.5, 1000, 1000);
+	glPopMatrix(); 
+
 
 	glutSwapBuffers();
 }
@@ -210,8 +249,8 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	glutInit(&argc, (char**) argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-	glutInitWindowPosition(100,100);
-	glutInitWindowSize(640,480);
+	glutInitWindowPosition(400,200);
+	glutInitWindowSize(1024,768);
 	glutCreateWindow("实时图形大作业 - 陶文博 2011011244");
 
 	glutDisplayFunc(display);
