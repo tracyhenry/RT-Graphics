@@ -22,20 +22,21 @@ GLfloat cRed[] = {1.0, 0.0, 0.0, 1.0};
 //the last key pressed
 unsigned lastKey = 'q';
 
-//
+//Variables for tracking objects
 GLfloat puckx, pucky, mx1, my1, mx2, my2;
+GLfloat vx, vy;
+int mousex, mousey;
+int isEnded, win;
+
 
 GLuint LoadTexture(const char * filename)
 {
 	GLuint texture;
 	int width, height;
-
 	unsigned char *data;
 
 	FILE *file;
-
 	file = fopen(filename, "rb");
-
 	if (file == NULL) return 0;
 	width = 128;
 	height = 128;
@@ -55,13 +56,10 @@ GLuint LoadTexture(const char * filename)
 		data[index + 2] = B;
 	}
 
-
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,GL_MODULATE);
 	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST );
-
-
 	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
 	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,GL_REPEAT );	
 	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,GL_REPEAT );
@@ -80,9 +78,9 @@ void Init()
 	glMaterialf(GL_FRONT, GL_SHININESS, material_shininess);
 
 	//Perspective Projection
-	gluLookAt(30, -50, 60, 
+	gluLookAt(0, -50, 60, 
               0, 0, 0, 
-              -3, 5, 0);
+              0, 5, 0);
 
 	//Set light sources
 	GLfloat lightpos0[] = {100, 100, 0, 0};
@@ -117,6 +115,7 @@ void Init()
 	puckx = pucky = 0;
 	mx1 = 0, my1 = -10;
 	mx2 = 0, my2 = 10;
+	isEnded = 0; win = -1;
 }
 
 void reshape(int width, int height)
@@ -135,10 +134,10 @@ void keyPressed (unsigned char key, int x, int y)
 	lastKey = key;
 }
 
-void timer(int value)
+void onMouseMove(int x, int y)
 {
-	glutPostRedisplay();
-	glutTimerFunc(10, timer, 0);
+	mousex = x;
+	mousey = y;
 }
 
 void display(void)
@@ -213,9 +212,9 @@ void display(void)
 	GLUquadric *quad = gluNewQuadric();
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cWhite);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
-	gluCylinder(quad, 1, 1, 1, 1000, 1000);
+	gluCylinder(quad, 1, 1, 1, 15, 15);
 	glTranslatef(puckx, pucky, 1e-2 + 1);
-	gluDisk(quad, 0, 1, 1000, 1000);
+	gluDisk(quad, 0, 1, 15, 15);
 	glPopMatrix(); 
 
 	//Draw mallet 1
@@ -224,9 +223,9 @@ void display(void)
 	GLUquadric *quad1 = gluNewQuadric();
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cBlue);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
-	gluCylinder(quad1, 1.5, 1.5, 1, 1000, 1000);
-	glTranslatef(puckx, pucky, 1e-2 + 1);
-	gluDisk(quad1, 0, 1.5, 1000, 1000);
+	gluCylinder(quad1, 1.5, 1.5, 1, 15, 15);
+	glTranslatef(0, 0, 1e-2 + 1);
+	gluDisk(quad1, 0, 1.5, 15, 15);
 	glPopMatrix(); 
 
 	//Draw mallet 1
@@ -235,13 +234,64 @@ void display(void)
 	GLUquadric *quad2 = gluNewQuadric();
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cPurple);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
-	gluCylinder(quad2, 1.5, 1.5, 1, 1000, 1000);
-	glTranslatef(puckx, pucky, 1e-2 + 1);
-	gluDisk(quad2, 0, 1.5, 1000, 1000);
+	gluCylinder(quad2, 1.5, 1.5, 1, 15, 15);
+	glTranslatef(0, 0, 1e-2 + 1);
+	gluDisk(quad2, 0, 1.5, 15, 15);
 	glPopMatrix(); 
 
-
 	glutSwapBuffers();
+}
+
+void timer(int value)
+{
+	//If either side win, we don't do any changes
+	if (isEnded) 
+	{
+		//If user pressed 'ENTER', we should restart the game 
+		if (lastKey == 13)
+		{
+			lastKey = 'x';    //a meaning less value
+			isEnded = 0;
+			win = -1;
+			puckx = pucky = 0;
+			vx = (rand() % 100) / 100.0;
+			vy = sqrt(1 - vx * vx);
+		}
+		return ;
+	}
+
+	//TODO: If the puck has touched one of the two goals, make isEnded = 1
+
+	//TODO: Move AI's mallet according to an AI
+
+	//TODO: Move the puck according to reflection
+
+	//Move user's mallet according to mouse
+	GLint viewport[4];
+    GLdouble modelview[16];
+    GLdouble projection[16];
+    GLfloat winX, winY, winZ;
+    GLdouble posX, posY, posZ;
+ 
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+    glGetDoublev(GL_PROJECTION_MATRIX, projection);
+    glGetIntegerv(GL_VIEWPORT, viewport);
+ 
+	winX = (float) mousex;   
+    winY = (float) viewport[3] - (float) mousey;	
+    glReadPixels(winX, (int) winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ); 
+    gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+
+	//If this point is really on the plane z = 0
+	if (fabs(posZ) <= 0.05 || fabs(posZ - 1) <= 0.05)
+	{
+		//If this point is within user's half court
+		if (-8.5 <= posX && posX <= 8.5)
+			if (-18.5 <= posY && posY <= -4)
+				mx1 = posX, my1 = posY;
+	}
+	glutPostRedisplay();
+	glutTimerFunc(1, timer, 0);
 }
 
 
@@ -249,14 +299,16 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	glutInit(&argc, (char**) argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-	glutInitWindowPosition(400,200);
-	glutInitWindowSize(1024,768);
+	glutInitWindowPosition(100, 100);
+	glutInitWindowSize(640, 480);
 	glutCreateWindow("实时图形大作业 - 陶文博 2011011244");
 
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
-//	glutKeyboardFunc(keyPressed);
-//	glutTimerFunc(10, timer, 0);
+	glutTimerFunc(10, timer, 0);
+//	glutIdleFunc(timer);
+	glutKeyboardFunc(keyPressed);
+	glutPassiveMotionFunc(onMouseMove);
 
 	Init();
 
