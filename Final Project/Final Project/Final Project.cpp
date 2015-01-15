@@ -22,9 +22,54 @@ GLfloat cBlue[] = {0.0, 0.0, 1.0, 1.0};
 GLfloat cGray[] = {0.6, 0.6, 0.6, 1.0};
 GLfloat cRed[] = {1.0, 0.0, 0.0, 1.0};
 
-
 //the last key pressed
 unsigned lastKey = 'q';
+
+GLuint LoadTexture(const char * filename)
+{
+	GLuint texture;
+	int width, height;
+
+	unsigned char *data;
+
+	FILE *file;
+
+	file = fopen(filename, "rb");
+
+	if (file == NULL) return 0;
+	width = 128;
+	height = 128;
+	data = (unsigned char *) malloc(width * height * 3);
+
+	fread(data, width * height * 3, 1, file);
+	fclose(file);
+
+	for(int i = 0; i < width * height; i ++)
+	{
+		int index = i * 3;
+		unsigned char B, R;
+		B = data[index];
+		R = data[index + 2];
+
+		data[index] = R;
+		data[index + 2] = B;
+	}
+
+
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,GL_MODULATE);
+	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST );
+
+
+	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
+	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,GL_REPEAT );	
+	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,GL_REPEAT );
+	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height,GL_RGB, GL_UNSIGNED_BYTE, data);
+	free(data);
+
+	return texture;
+}
 
 void Init()
 {
@@ -35,7 +80,7 @@ void Init()
 	glMaterialf(GL_FRONT, GL_SHININESS, material_shininess);
 
 	//Perspective Projection
-	gluLookAt(30, -50, 30, 
+	gluLookAt(30, -50, 60, 
               0, 0, 0, 
               -3, 5, 0);
 
@@ -43,8 +88,8 @@ void Init()
 	GLfloat lightpos0[] = {100, 100, 0, 0};
 	
 	GLfloat light0_position[] = {-100, 0, 0, 0};
-	GLfloat light1_position[] = {100, 0, 0, 0};	
-	GLfloat light2_position[] = {0, -500, 0, 0};	
+	GLfloat light1_position[] = {100, 0, 0, 0};
+	GLfloat light2_position[] = {0, 500, 0, 0};	
 	GLfloat light_colors[] = {1, 1, 1, 1};
 
 	glEnable(GL_LIGHTING);
@@ -65,7 +110,6 @@ void Init()
 	glLightfv(GL_LIGHT1, GL_SPECULAR, light_colors);
 	glLightfv(GL_LIGHT2, GL_SPECULAR, light_colors);
 	
-
 	//Enable depth
 	glEnable(GL_DEPTH_TEST);
 }
@@ -75,7 +119,7 @@ void reshape(int width, int height)
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45.0, (double)width/(double)height, 1.0, 100.0);
+	gluPerspective(45.0, (double)width/(double)height, 1.0, 10000.0);
 	glMatrixMode(GL_MODELVIEW);
 }
 
@@ -104,8 +148,31 @@ void display(void)
 	glRectf(10, 20, -10, -20);
 	glPopMatrix(); 
 
+	//Draw a floor
+	const int BOUND = 1000;
+	const int REPEAT = 200;
+	glPushMatrix();
+	glEnable(GL_TEXTURE_2D);
+	glTranslatef(0, 0, -22);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cWhite);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
+	glBindTexture(GL_TEXTURE_2D, LoadTexture("floor.bmp"));
+	glBegin(GL_QUADS);
+	glNormal3f(0, 0, 1);   
+	glTexCoord2f(0.0, 0.0);
+	glVertex3f(BOUND, BOUND, 0);			// Top Right Of The Quad (Top)
+	glTexCoord2f(0.0, REPEAT);	
+	glVertex3f(-BOUND, BOUND, 0);			// Top Left Of The Quad (Top)
+	glTexCoord2f(REPEAT, REPEAT);	
+	glVertex3f(-BOUND, -BOUND, 0);			// Bottom Left Of The Quad (Top)
+	glTexCoord2f(REPEAT, 0.0);	
+	glVertex3f(BOUND, -BOUND, 0);			// Bottom Right Of The Quad (Top)
+	glEnd();					
+	glPopMatrix();
+	
 	//Draw two cubes
 	glPushMatrix();
+	glDisable(GL_TEXTURE_2D);
 	glTranslatef(0, -10, -11);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cGray);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
@@ -119,7 +186,22 @@ void display(void)
 	glutSolidCube(22);
 	glPopMatrix();  
 
-	
+	//Draw Goal
+	glPushMatrix();
+	glTranslatef(0, 0, 1e-2);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cRed);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
+	glRectf(-4, -20, 4, -21);
+	glPopMatrix(); 
+
+	//Draw Goal
+	glPushMatrix();
+	glTranslatef(0, 0, 1e-2);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cRed);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
+	glRectf(-4, 20, 4, 21);
+	glPopMatrix(); 
+
 	glutSwapBuffers();
 }
 
