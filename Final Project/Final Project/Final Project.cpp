@@ -24,7 +24,7 @@ unsigned lastKey = 'q';
 
 //Variables for tracking objects
 GLfloat puckx, pucky, mx1, my1, mx2, my2;
-GLfloat vx, vy;
+GLfloat vx, vy, tmp;
 int mousex, mousey;
 int isEnded, win;
 
@@ -78,9 +78,9 @@ void Init()
 	glMaterialf(GL_FRONT, GL_SHININESS, material_shininess);
 
 	//Perspective Projection
-	gluLookAt(0, -50, 60, 
+	gluLookAt(30, -50, 60, 
               0, 0, 0, 
-              0, 5, 0);
+              -3, 5, 0);
 
 	//Set light sources
 	GLfloat lightpos0[] = {100, 100, 0, 0};
@@ -116,7 +116,7 @@ void Init()
 	mx1 = 0, my1 = -10;
 	mx2 = 0, my2 = 10;
 	vx = (rand() % 100) / 100.0;
-	vy = sqrt(1 - vx * vx);
+	vy = -sqrt(1 - vx * vx);
 	isEnded = 0; win = -1;
 }
 
@@ -241,6 +241,23 @@ void display(void)
 	gluDisk(quad2, 0, 1.5, 15, 15);
 	glPopMatrix(); 
 
+
+	//Game is over
+	if (isEnded)
+	{
+		glRasterPos2f(100, 100);
+		string wins = "You Win!";
+		string lose = "You Lost!";
+		if (win == 1)
+		{
+			for (int i = 0; i < wins.size(); i ++)
+				glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, wins[i]);
+		}
+		else 
+			for (int i = 0; i < lose.size(); i ++)
+			glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, lose[i]);
+	}
+
 	glutSwapBuffers();
 }
 
@@ -252,17 +269,39 @@ void timer(int value)
 		//If user pressed 'ENTER', we should restart the game 
 		if (lastKey == 13)
 		{
-			lastKey = 'x';    //a meaning less value
+			lastKey = 'x';    //a meaningless value
 			isEnded = 0;
 			win = -1;
 			puckx = pucky = 0;
 			vx = (rand() % 100) / 100.0;
-			vy = sqrt(1 - vx * vx);
+			vy = -sqrt(1 - vx * vx);
 		}
+		glutPostRedisplay();
+		glutTimerFunc(10, timer, 0);
 		return ;
 	}
 
-	//TODO: If the puck has touched one of the two goals, make isEnded = 1
+	//check puck's collision with goal 1
+	if (pucky + vy >= 18.8 && fabs(puckx) <= 3)
+	{
+		isEnded = 1;
+		win = 1;
+		puckx += vx, pucky += vy;
+		glutPostRedisplay();
+		glutTimerFunc(10, timer, 0);
+		return ;
+	}
+
+	//check puck's collision with goal 2
+	if (pucky + vy <= -18.8 && fabs(puckx) <= 3)
+	{
+		isEnded = 1;
+		win = 0;
+		puckx += vx, pucky += vy;
+		glutPostRedisplay();
+		glutTimerFunc(10, timer, 0);
+		return ;
+	}
 
 	//TODO: Move AI's mallet according to an AI
 
@@ -271,8 +310,26 @@ void timer(int value)
 		vx *= -1;
 	if (pucky + vy <= -19 || pucky + vy >= 19)
 		vy *= -1;
-	puckx += vx, pucky += vy;
 
+	//Check puck's collision with AI's mallet
+	if ((puckx - mx2) * (puckx - mx2) + (pucky - my2) * (pucky - my2) < 2.5 * 2.5)
+	{
+		vx = puckx - mx2;
+		vy = pucky - my2;
+		tmp = sqrt(vx * vx + vy * vy);
+		vx /= tmp, vy /= tmp;
+	}
+
+	//Check puck's collision with user's mallet
+	if ((puckx - mx1) * (puckx - mx1) + (pucky - my1) * (pucky - my1) < 2.5 * 2.5)
+	{
+		vx = puckx - mx1;
+		vy = pucky - my1;
+		tmp = sqrt(vx * vx + vy * vy);
+		vx /= tmp, vy /= tmp;
+	}
+
+	puckx += vx / 3.0, pucky += vy / 3.0;
 
 	//Move user's mallet according to mouse
 	GLint viewport[4];
@@ -300,7 +357,7 @@ void timer(int value)
 	}
 
 	glutPostRedisplay();
-	glutTimerFunc(30, timer, 0);
+	glutTimerFunc(10, timer, 0);
 }
 
 
@@ -308,14 +365,13 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	glutInit(&argc, (char**) argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-	glutInitWindowPosition(100, 100);
-	glutInitWindowSize(640, 480);
+	glutInitWindowPosition(200, 200);
+	glutInitWindowSize(800, 600);
 	glutCreateWindow("实时图形大作业 - 陶文博 2011011244");
 
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
-	glutTimerFunc(30, timer, 0);
-//	glutIdleFunc(timer);
+	glutTimerFunc(10, timer, 0);
 	glutKeyboardFunc(keyPressed);
 	glutPassiveMotionFunc(onMouseMove);
 
