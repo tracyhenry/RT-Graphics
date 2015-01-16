@@ -45,13 +45,14 @@ public:
 
 
 //Real numbers to determine the materials
-GLfloat material_ambient[] = {0.4, 0.4, 0.4};
+GLfloat material_ambient[] = {0.2, 0.2, 0.2};
 GLfloat material_diffuse[] = {0.4, 0.4, 0.4};
 GLfloat material_specular[] = {0.4, 0.4, 0.4};
 GLfloat material_shininess = 50.0f;
 
 GLfloat cYellow[] = {1.0, 1.0, 0.2, 1.0};
 GLfloat cPurple[] = {0.8, 0, 0.8};
+GLfloat cBlack[] = {0.1, 0.1, 0.1};
 GLfloat cPeach[] = {1.0, 0.937, 0.83};
 GLfloat cGreen[] = {0.0, 1.0, 0.0, 1.0};
 GLfloat cWhite[] = {1.0, 1.0, 1.0, 1.0};
@@ -119,25 +120,7 @@ void Init()
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, material_specular);
 	glMaterialf(GL_FRONT, GL_SHININESS, material_shininess);
-
-	//Set light sources	
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHT1);
-	glEnable(GL_LIGHT2);
-	glEnable(GL_LIGHT3);
-	glEnable(GL_LIGHT4);
-//	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
-//	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
-//	glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
-
-//	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_colors);
-//	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_colors);
-//	glLightfv(GL_LIGHT2, GL_DIFFUSE, light_colors);
-//	glLightfv(GL_LIGHT0, GL_SPECULAR, light_colors);
-//	glLightfv(GL_LIGHT1, GL_SPECULAR, light_colors);
-//	glLightfv(GL_LIGHT2, GL_SPECULAR, light_colors);
-	
+		
 	//Enable depth
 	glEnable(GL_DEPTH_TEST);
 
@@ -187,34 +170,29 @@ void onMouseMove(int x, int y)
 void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	glLoadIdentity();
 	gluLookAt(camera.getX(), camera.getY(), camera.getZ(),
             0, 0, 0,
             -camera.getX(), -camera.getY(), 0);
-	GLfloat light0_position[] = {0, 0, 100, 1};
-	GLfloat light1_position[] = {100, 0, -10, 1};
-	GLfloat light2_position[] = {0, 100, -10, 1};
-	GLfloat light3_position[] = {0, -100, -10, 1};
-	GLfloat light4_position[] = {-100, 0, -10, 1};
-	GLfloat light_colors[] = {0.6, 0.6, 0.6};
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	glEnable(GL_LIGHT2);
+	GLfloat light0_position[] = {10, 10, 10, 1};
+	GLfloat light1_position[] = {100, 0, 10, 1};
+	GLfloat light2_position[] = {-100, 0, 10, 1};
+	GLfloat light_colors[] = {0.4, 0.4, 0.4};
 
 	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
 	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
 	glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
-	glLightfv(GL_LIGHT3, GL_POSITION, light3_position);
-	glLightfv(GL_LIGHT4, GL_POSITION, light4_position);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_colors);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_colors);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, light_colors);
-	glLightfv(GL_LIGHT3, GL_DIFFUSE, light_colors);
-	glLightfv(GL_LIGHT4, GL_DIFFUSE, light_colors);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light_colors);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, light_colors);
 	glLightfv(GL_LIGHT2, GL_SPECULAR, light_colors);
-	glLightfv(GL_LIGHT3, GL_SPECULAR, light_colors);
-	glLightfv(GL_LIGHT4, GL_SPECULAR, light_colors);
-
 
 	//Draw a rectangle
 	glPushMatrix();
@@ -261,6 +239,19 @@ void display(void)
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.5);
 	glutSolidCube(22);
 	glPopMatrix();  
+
+	//Draw Six Rectangles
+	glPushMatrix();
+	glTranslatef(0, 0, 1e-2);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cBlue);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.5);	
+	glRectf(-11, -20, -4, -21);
+	glRectf(4, -20, 11, -21);
+	glRectf(-4, 20, -11, 21);
+	glRectf(4, 20, 11, 21);
+	glRectf(-11, -20, -10, 20);
+	glRectf(11, -20, 10, 20);
+	glPopMatrix(); 
 
 	//Draw Goal 1
 	glPushMatrix();
@@ -313,7 +304,7 @@ void display(void)
 	if (isEnded)
 	{
 		glPushMatrix();
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cGray);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cRed);
 		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
 		glRasterPos2f(-4.5, 0);
 		string wins = "You Win!";
