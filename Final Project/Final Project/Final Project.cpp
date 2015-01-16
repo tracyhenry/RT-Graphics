@@ -115,6 +115,8 @@ void Init()
 	puckx = pucky = 0;
 	mx1 = 0, my1 = -10;
 	mx2 = 0, my2 = 10;
+	vx = (rand() % 100) / 100.0;
+	vy = sqrt(1 - vx * vx);
 	isEnded = 0; win = -1;
 }
 
@@ -213,7 +215,7 @@ void display(void)
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cWhite);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
 	gluCylinder(quad, 1, 1, 1, 15, 15);
-	glTranslatef(puckx, pucky, 1e-2 + 1);
+	glTranslatef(0, 0, 1e-2 + 1);
 	gluDisk(quad, 0, 1, 15, 15);
 	glPopMatrix(); 
 
@@ -264,7 +266,13 @@ void timer(int value)
 
 	//TODO: Move AI's mallet according to an AI
 
-	//TODO: Move the puck according to reflection
+	//Check puck's collision with wall
+	if (puckx + vx <= -9 || puckx  + vx >= 9)
+		vx *= -1;
+	if (pucky + vy <= -19 || pucky + vy >= 19)
+		vy *= -1;
+	puckx += vx, pucky += vy;
+
 
 	//Move user's mallet according to mouse
 	GLint viewport[4];
@@ -290,8 +298,9 @@ void timer(int value)
 			if (-18.5 <= posY && posY <= -4)
 				mx1 = posX, my1 = posY;
 	}
+
 	glutPostRedisplay();
-	glutTimerFunc(1, timer, 0);
+	glutTimerFunc(30, timer, 0);
 }
 
 
@@ -305,7 +314,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
-	glutTimerFunc(10, timer, 0);
+	glutTimerFunc(30, timer, 0);
 //	glutIdleFunc(timer);
 	glutKeyboardFunc(keyPressed);
 	glutPassiveMotionFunc(onMouseMove);
