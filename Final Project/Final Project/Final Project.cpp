@@ -26,6 +26,9 @@ unsigned lastKey = 'q';
 //Variables for tracking objects
 GLfloat puckx, pucky, mx1, my1, mx2, my2;
 GLfloat vx, vy, tmp;
+GLUquadric *quad = gluNewQuadric();
+GLUquadric *quad1 = gluNewQuadric();
+GLUquadric *quad2 = gluNewQuadric();
 int mousex, mousey;
 int isEnded, win;
 
@@ -214,7 +217,7 @@ void display(void)
 	//Draw a puck
 	glPushMatrix();
 	glTranslatef(puckx, pucky, 1e-2);
-	GLUquadric *quad = gluNewQuadric();
+//	GLUquadric *quad = gluNewQuadric();
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cWhite);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
 	gluCylinder(quad, 1, 1, 1, 15, 15);
@@ -225,7 +228,7 @@ void display(void)
 	//Draw mallet 1
 	glPushMatrix();
 	glTranslatef(mx1, my1, 1e-2);
-	GLUquadric *quad1 = gluNewQuadric();
+//	GLUquadric *quad1 = gluNewQuadric();
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cBlue);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
 	gluCylinder(quad1, 1.5, 1.5, 1, 15, 15);
@@ -236,7 +239,7 @@ void display(void)
 	//Draw mallet 1
 	glPushMatrix();
 	glTranslatef(mx2, my2, 1e-2);
-	GLUquadric *quad2 = gluNewQuadric();
+//	GLUquadric *quad2 = gluNewQuadric();
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cPurple);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
 	gluCylinder(quad2, 1.5, 1.5, 1, 15, 15);
@@ -310,7 +313,7 @@ void timer(int value)
 	}
 
 	//Move AI's mallet according to a simple AI
-	if (rand() % 100 <= 60)
+	if (rand() % 100 <= 40)
 		tmp = 0;
 	else tmp = 0.3;
 	if (mx2 < puckx) 
