@@ -5,10 +5,49 @@
 #include <ctime>
 using namespace std;
 
+
+class Camera 
+{
+	double theta, dTheta, pi;
+
+public:
+	Camera(): theta(270), dTheta(2), pi(3.14159265354) {}
+	double getX() 
+	{
+		return 50 * cos(theta / 180 * pi);
+	}
+	
+	double getY() 
+	{
+		return 50 * sin(theta / 180 * pi);
+	}
+
+	double getZ() 
+	{
+		return 60;
+	}
+	
+	void moveLeft() 
+	{
+		theta += dTheta;
+		if (theta >= 360)
+			theta -= 360;
+	}
+
+	void moveRight() 
+	{
+		theta -= dTheta;
+		if (theta < 0)
+			theta += 360;
+	}
+};
+
+
+
 //Real numbers to determine the materials
-GLfloat material_ambient[] = {0.5f, 0.5f, 0.5f};
-GLfloat material_diffuse[] = {0.10f, 0.10f, 0.10f};
-GLfloat material_specular[] = {0.40f, 0.40f, 0.40f};
+GLfloat material_ambient[] = {0.4, 0.4, 0.4};
+GLfloat material_diffuse[] = {0.4, 0.4, 0.4};
+GLfloat material_specular[] = {0.4, 0.4, 0.4};
 GLfloat material_shininess = 50.0f;
 
 GLfloat cYellow[] = {1.0, 1.0, 0.2, 1.0};
@@ -29,6 +68,8 @@ GLfloat vx, vy, tmp;
 GLUquadric *quad = gluNewQuadric();
 GLUquadric *quad1 = gluNewQuadric();
 GLUquadric *quad2 = gluNewQuadric();
+GLuint floorTexture;
+Camera camera;
 int mousex, mousey;
 int isEnded, win;
 
@@ -63,10 +104,6 @@ GLuint LoadTexture(const char * filename)
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,GL_MODULATE);
-	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST );
-	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR );
-	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,GL_REPEAT );	
-	//glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,GL_REPEAT );
 	gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height,GL_RGB, GL_UNSIGNED_BYTE, data);
 	free(data);
 
@@ -83,39 +120,29 @@ void Init()
 	glMaterialfv(GL_FRONT, GL_SPECULAR, material_specular);
 	glMaterialf(GL_FRONT, GL_SHININESS, material_shininess);
 
-	//Perspective Projection
-	gluLookAt(0, -50, 60, 
-              0, 0, 0, 
-              0, 5, 0);
-
-	//Set light sources
-	GLfloat lightpos0[] = {100, 100, 0, 0};
-	
-	GLfloat light0_position[] = {-100, 0, 0, 0};
-	GLfloat light1_position[] = {100, 0, 0, 0};
-	GLfloat light2_position[] = {0, 500, 0, 0};	
-	GLfloat light_colors[] = {1, 1, 1, 1};
-
+	//Set light sources	
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHT1);
 	glEnable(GL_LIGHT2);
+	glEnable(GL_LIGHT3);
+	glEnable(GL_LIGHT4);
+//	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
+//	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
+//	glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
 
-	glPushMatrix();
-	glTranslatef(0, 0, 0);
-	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
-	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
-	glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
-	glPopMatrix();
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_colors);
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_colors);
-	glLightfv(GL_LIGHT2, GL_DIFFUSE, light_colors);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, light_colors);
-	glLightfv(GL_LIGHT1, GL_SPECULAR, light_colors);
-	glLightfv(GL_LIGHT2, GL_SPECULAR, light_colors);
+//	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_colors);
+//	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_colors);
+//	glLightfv(GL_LIGHT2, GL_DIFFUSE, light_colors);
+//	glLightfv(GL_LIGHT0, GL_SPECULAR, light_colors);
+//	glLightfv(GL_LIGHT1, GL_SPECULAR, light_colors);
+//	glLightfv(GL_LIGHT2, GL_SPECULAR, light_colors);
 	
 	//Enable depth
 	glEnable(GL_DEPTH_TEST);
+
+	//Init texture
+	floorTexture = LoadTexture("floor.bmp");
 
 	//Init positions
 	puckx = pucky = 0;
@@ -135,11 +162,20 @@ void reshape(int width, int height)
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void keyPressed (unsigned char key, int x, int y)
+void keyPressed(unsigned char key, int x, int y)
 {
 	if (key == 27) 
 		exit(0);
 	lastKey = key;
+}
+
+void special(int key, int, int)
+{	
+	if (key == GLUT_KEY_LEFT)
+		camera.moveLeft();
+	else if (key == GLUT_KEY_RIGHT)
+		camera.moveRight();
+	glutPostRedisplay();
 }
 
 void onMouseMove(int x, int y)
@@ -151,6 +187,34 @@ void onMouseMove(int x, int y)
 void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glLoadIdentity();
+	gluLookAt(camera.getX(), camera.getY(), camera.getZ(),
+            0, 0, 0,
+            -camera.getX(), -camera.getY(), 0);
+	GLfloat light0_position[] = {0, 0, 100, 1};
+	GLfloat light1_position[] = {100, 0, -10, 1};
+	GLfloat light2_position[] = {0, 100, -10, 1};
+	GLfloat light3_position[] = {0, -100, -10, 1};
+	GLfloat light4_position[] = {-100, 0, -10, 1};
+	GLfloat light_colors[] = {0.6, 0.6, 0.6};
+
+	glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
+	glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
+	glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
+	glLightfv(GL_LIGHT3, GL_POSITION, light3_position);
+	glLightfv(GL_LIGHT4, GL_POSITION, light4_position);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_colors);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_colors);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, light_colors);
+	glLightfv(GL_LIGHT3, GL_DIFFUSE, light_colors);
+	glLightfv(GL_LIGHT4, GL_DIFFUSE, light_colors);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_colors);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, light_colors);
+	glLightfv(GL_LIGHT2, GL_SPECULAR, light_colors);
+	glLightfv(GL_LIGHT3, GL_SPECULAR, light_colors);
+	glLightfv(GL_LIGHT4, GL_SPECULAR, light_colors);
+
 
 	//Draw a rectangle
 	glPushMatrix();
@@ -168,7 +232,7 @@ void display(void)
 	glTranslatef(0, 0, -22);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cWhite);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
-	glBindTexture(GL_TEXTURE_2D, LoadTexture("floor.bmp"));
+	glBindTexture(GL_TEXTURE_2D, floorTexture);
 	glBegin(GL_QUADS);
 	glNormal3f(0, 0, 1);   
 	glTexCoord2f(0.0, 0.0);
@@ -187,14 +251,14 @@ void display(void)
 	glDisable(GL_TEXTURE_2D);
 	glTranslatef(0, -10, -11);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cGray);
-	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.5);
 	glutSolidCube(22);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(0, 10, -11);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cGray);
-	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1);
+	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.5);
 	glutSolidCube(22);
 	glPopMatrix();  
 
@@ -217,7 +281,6 @@ void display(void)
 	//Draw a puck
 	glPushMatrix();
 	glTranslatef(puckx, pucky, 1e-2);
-//	GLUquadric *quad = gluNewQuadric();
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cWhite);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
 	gluCylinder(quad, 1, 1, 1, 15, 15);
@@ -228,7 +291,6 @@ void display(void)
 	//Draw mallet 1
 	glPushMatrix();
 	glTranslatef(mx1, my1, 1e-2);
-//	GLUquadric *quad1 = gluNewQuadric();
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cBlue);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
 	gluCylinder(quad1, 1.5, 1.5, 1, 15, 15);
@@ -239,7 +301,6 @@ void display(void)
 	//Draw mallet 1
 	glPushMatrix();
 	glTranslatef(mx2, my2, 1e-2);
-//	GLUquadric *quad2 = gluNewQuadric();
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cPurple);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
 	gluCylinder(quad2, 1.5, 1.5, 1, 15, 15);
@@ -252,7 +313,8 @@ void display(void)
 	if (isEnded)
 	{
 		glPushMatrix();
-		glColor3f(1, 0, 0);
+		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cGray);
+		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
 		glRasterPos2f(-4.5, 0);
 		string wins = "You Win!";
 		string lose = "You Lost!";
@@ -290,6 +352,7 @@ void timer(int value)
 		return ;
 	}
 
+	lastKey = 'x';
 	//check puck's collision with goal 1
 	if (pucky + vy >= 18.9 && fabs(puckx) <= 3.5)
 	{
@@ -389,14 +452,16 @@ int _tmain(int argc, _TCHAR* argv[])
 	glutInitWindowSize(800, 600);
 	glutCreateWindow("实时图形大作业 - 陶文博 2011011244");
 
+	Init();
+
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
+	glutSpecialFunc(special);
 	glutTimerFunc(10, timer, 0);
 	glutKeyboardFunc(keyPressed);
 	glutPassiveMotionFunc(onMouseMove);
 
-	Init();
-
+	
 	glutMainLoop();
 
 	return 0;
