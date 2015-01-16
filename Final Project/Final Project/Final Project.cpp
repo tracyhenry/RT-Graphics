@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <gl/glut.h>
 #include <iostream>
+#include <ctime>
 using namespace std;
 
 //Real numbers to determine the materials
@@ -71,6 +72,8 @@ GLuint LoadTexture(const char * filename)
 
 void Init()
 {
+	srand(time(0));
+
 	//Init Material
 	glMaterialfv(GL_FRONT, GL_AMBIENT, material_ambient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
@@ -306,7 +309,14 @@ void timer(int value)
 		return ;
 	}
 
-	//TODO: Move AI's mallet according to an AI
+	//Move AI's mallet according to a simple AI
+	if (rand() % 100 <= 60)
+		tmp = 0;
+	else tmp = 0.3;
+	if (mx2 < puckx) 
+		mx2 += tmp; else mx2 -= tmp;
+	//	mx2 = puckx;
+	
 
 	//Check puck's collision with wall
 	if (puckx + vx <= -9 || puckx  + vx >= 9)
@@ -333,6 +343,10 @@ void timer(int value)
 	}
 
 	puckx += vx / 3.0, pucky += vy / 3.0;
+	if (puckx > 10) puckx = 9;
+	if (puckx < -10) puckx = -9;
+	if (pucky > 20) pucky = 19;
+	if (pucky < -20) pucky = -19;
 
 	//Move user's mallet according to mouse
 	GLint viewport[4];
