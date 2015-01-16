@@ -78,9 +78,9 @@ void Init()
 	glMaterialf(GL_FRONT, GL_SHININESS, material_shininess);
 
 	//Perspective Projection
-	gluLookAt(30, -50, 60, 
+	gluLookAt(0, -50, 60, 
               0, 0, 0, 
-              -3, 5, 0);
+              0, 5, 0);
 
 	//Set light sources
 	GLfloat lightpos0[] = {100, 100, 0, 0};
@@ -245,7 +245,9 @@ void display(void)
 	//Game is over
 	if (isEnded)
 	{
-		glRasterPos2f(100, 100);
+		glPushMatrix();
+		glColor3f(1, 0, 0);
+		glRasterPos2f(-4.5, 0);
 		string wins = "You Win!";
 		string lose = "You Lost!";
 		if (win == 1)
@@ -256,6 +258,7 @@ void display(void)
 		else 
 			for (int i = 0; i < lose.size(); i ++)
 			glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, lose[i]);
+		glPopMatrix();
 	}
 
 	glutSwapBuffers();
@@ -282,7 +285,7 @@ void timer(int value)
 	}
 
 	//check puck's collision with goal 1
-	if (pucky + vy >= 18.8 && fabs(puckx) <= 3)
+	if (pucky + vy >= 18.9 && fabs(puckx) <= 3.5)
 	{
 		isEnded = 1;
 		win = 1;
@@ -293,7 +296,7 @@ void timer(int value)
 	}
 
 	//check puck's collision with goal 2
-	if (pucky + vy <= -18.8 && fabs(puckx) <= 3)
+	if (pucky + vy <= -18.9 && fabs(puckx) <= 3.5)
 	{
 		isEnded = 1;
 		win = 0;
