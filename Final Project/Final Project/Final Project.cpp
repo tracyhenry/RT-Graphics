@@ -307,7 +307,7 @@ void display(void)
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, cRed);
 		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 1.2);	
 		glRasterPos2f(-4.5, 0);
-		string wins = "You Win!";
+		string wins = "You Won!";
 		string lose = "You Lost!";
 		if (win == 1)
 		{
@@ -372,8 +372,9 @@ void timer(int value)
 	else tmp = 0.3;
 	if (mx2 < puckx) 
 		mx2 += tmp; else mx2 -= tmp;
-	//	mx2 = puckx;
-	
+	if (rand() % 100 <= 5)
+		if (mx2 > 0) mx2 -= tmp * 3;
+		else mx2 += tmp * 3;
 
 	//Check puck's collision with wall
 	if (puckx + vx <= -9 || puckx  + vx >= 9)
