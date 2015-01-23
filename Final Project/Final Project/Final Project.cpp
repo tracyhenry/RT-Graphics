@@ -443,7 +443,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutInitWindowPosition(200, 200);
 	glutInitWindowSize(800, 600);
-	glutCreateWindow("实时图形大作业 - 陶文博 2011011244");
+	glutCreateWindow("实时图形大作业 - 陶文博 & 黄景畦");
 
 	Init();
 
