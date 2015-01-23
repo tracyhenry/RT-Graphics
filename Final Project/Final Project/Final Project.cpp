@@ -381,7 +381,8 @@ void timer(int value)
 		vx *= -1;
 	if (pucky + vy <= -19 || pucky + vy >= 19)
 		vy *= -1;
-
+	if (fabs(vx) <= 1e-2)
+		vx += (rand() % 200 - 100) / 200.0;
 	//Check puck's collision with AI's mallet
 	if ((puckx - mx2) * (puckx - mx2) + (pucky - my2) * (pucky - my2) < 2.5 * 2.5)
 	{
